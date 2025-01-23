@@ -1,7 +1,8 @@
 import logging
 
+import gymnasium as gym  # Using gymnasium instead of gym
 import wandb
-from hockey.hockey_env import HockeyEnv_BasicOpponent
+from hockey import REGISTERED_ENVS
 from stable_baselines3 import SAC
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.utils import set_random_seed
@@ -14,7 +15,9 @@ logging.basicConfig(level=logging.INFO)
 CONFIG = {
     "policy_type": "MlpPolicy",
     "total_timesteps": 100_000,
-    "env_name": "HockeyEnv_BasicOpponent",
+    "env_name": "Hockey-One-v0",
+    "env_mode": 0,
+    "weak_opponent": True,
 }
 
 # Initialize WandB
@@ -28,8 +31,14 @@ run = wandb.init(
 
 # Function to create and monitor the environment
 def make_env():
-    _env = HockeyEnv_BasicOpponent()  # Initialize your custom environment
-    _env = Monitor(_env)  # Wrap it to record stats like rewards
+    assert REGISTERED_ENVS, "Environments are not registered in hockey."
+    # Explicitly use hockey's environment registration
+    _env = gym.make(
+        CONFIG["env_name"],
+        mode=CONFIG["env_mode"],
+        weak_opponent=CONFIG["weak_opponent"],
+    )
+    _env = Monitor(_env)  # Wrap it to record stats like rewards and episode lengths
     return _env
 
 
