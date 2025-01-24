@@ -43,7 +43,9 @@ def make_env():
 
 
 # Wrap the environment
-env = DummyVecEnv([make_env])  # Use DummyVecEnv for compatibility with stable-baselines3
+env = DummyVecEnv(
+    [make_env]
+)  # Use DummyVecEnv for compatibility with stable-baselines3
 
 # Set a consistent random seed for reproducibility
 set_random_seed(42)

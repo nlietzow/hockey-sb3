@@ -1,7 +1,7 @@
-import gymnasium as gym  # Using gymnasium instead of gym
+import gymnasium as gym
 import wandb
 from hockey import REGISTERED_ENVS
-from stable_baselines3 import PPO
+from stable_baselines3 import SAC
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
@@ -27,7 +27,7 @@ def make_env():
 
 
 env = DummyVecEnv([make_env])
-model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}")
+model = SAC(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}")
 model.learn(
     total_timesteps=config["total_timesteps"],
     callback=WandbCallback(
@@ -35,6 +35,5 @@ model.learn(
         model_save_path=f"models/{run.id}",
         verbose=2,
     ),
-
 )
 run.finish()
