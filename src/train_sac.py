@@ -19,7 +19,6 @@ config = {
 run = wandb.init(
     project="hockey-sb3",
     config=config,
-    sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
 )
 
 
@@ -33,7 +32,7 @@ env = DummyVecEnv([make_env])
 eval_env = DummyVecEnv([make_env])
 
 # Define the model
-model = SAC(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}")
+model = SAC(config["policy_type"], env, verbose=1)
 
 # Create the custom evaluation callback
 eval_callback = EvalCallback(
@@ -45,7 +44,6 @@ eval_callback = EvalCallback(
     render=False
 )
 wandb_callback = WandbCallback(
-    gradient_save_freq=100,
     model_save_path=f"models/{run.id}",
     verbose=2,
 )
