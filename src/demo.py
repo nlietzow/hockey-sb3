@@ -3,7 +3,7 @@ import wandb
 from hockey import REGISTERED_ENVS
 from stable_baselines3 import PPO
 from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.vec_env import DummyVecEnv, VecVideoRecorder
+from stable_baselines3.common.vec_env import DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
 assert REGISTERED_ENVS, "Environments are not registered in hockey."
@@ -29,12 +29,6 @@ def make_env():
 
 
 env = DummyVecEnv([make_env])
-env = VecVideoRecorder(
-    env,
-    f"videos/{run.id}",
-    record_video_trigger=lambda x: x % 2000 == 0,
-    video_length=200,
-)
 model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}")
 model.learn(
     total_timesteps=config["total_timesteps"],
