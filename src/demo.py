@@ -1,4 +1,4 @@
-import gym
+import gymnasium as gym  # Using gymnasium instead of gym
 import wandb
 from stable_baselines3 import PPO
 from stable_baselines3.common.monitor import Monitor
