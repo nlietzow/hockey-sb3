@@ -1,72 +1,64 @@
-import logging
-
-import gymnasium as gym  # Using gymnasium instead of gym
+import gymnasium as gym
 import wandb
 from hockey import REGISTERED_ENVS
 from stable_baselines3 import SAC
+from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.vec_env import DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
-logging.basicConfig(level=logging.INFO)
+assert REGISTERED_ENVS, "Hockey environments are not registered."
 
-# Configuration for the training
-CONFIG = {
+config = {
     "policy_type": "MlpPolicy",
     "total_timesteps": 100_000,
     "env_name": "Hockey-One-v0",
-    "env_mode": 0,
-    "weak_opponent": True,
+    "eval_freq": 10_000,
+    "n_eval_episodes": 10,
 }
-
-# Initialize WandB
 run = wandb.init(
     project="hockey-sb3",
-    config=CONFIG,
-    monitor_gym=True,  # Automatically upload gym monitor stats
-    save_code=True,  # Save the code to the WandB run
+    config=config,
+    sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
 )
 
 
-# Function to create and monitor the environment
 def make_env():
-    assert REGISTERED_ENVS, "Environments are not registered in hockey."
-    # Explicitly use hockey's environment registration
-    _env = gym.make(
-        CONFIG["env_name"],
-        mode=CONFIG["env_mode"],
-        weak_opponent=CONFIG["weak_opponent"],
-    )
-    _env = Monitor(_env)  # Wrap it to record stats like rewards and episode lengths
+    _env = gym.make(config["env_name"])
+    _env = Monitor(_env)  # record stats such as returns
     return _env
 
 
-# Wrap the environment
-env = DummyVecEnv(
-    [make_env]
-)  # Use DummyVecEnv for compatibility with stable-baselines3
+env = DummyVecEnv([make_env])
+eval_env = DummyVecEnv([make_env])
 
-# Set a consistent random seed for reproducibility
-set_random_seed(42)
+# Define the model
+model = SAC(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}")
 
-# Initialize the SAC model
-model = SAC(CONFIG["policy_type"], env, verbose=1)
+# Create the custom evaluation callback
+eval_callback = EvalCallback(
+    eval_env,
+    log_path=f"models/{run.id}/eval_logs",
+    eval_freq=config["eval_freq"],
+    n_eval_episodes=config["n_eval_episodes"],
+    deterministic=True,
+    render=False
+)
+wandb_callback = WandbCallback(
+    gradient_save_freq=100,
+    model_save_path=f"models/{run.id}",
+    verbose=2,
+)
 
-# Train the model
+# Train the model with evaluation and Wandb callback
 try:
     model.learn(
-        total_timesteps=CONFIG["total_timesteps"],
-        callback=WandbCallback(
-            gradient_save_freq=100,  # Save gradients every 100 steps
-            model_save_path=f"models/{run.id}",  # Save the model to this path
-            verbose=2,  # Log detailed information to the terminal
-        ),
+        total_timesteps=config["total_timesteps"],
+        callback=[eval_callback, wandb_callback],
     )
-    model.save(f"models/sac_hockey_{run.id}")
-    logging.info("Model training and saving completed successfully.")
 except Exception as e:
-    logging.error(f"Training failed: {e}", exc_info=True)
+    print("Error during training:", e)
 finally:
-    env.close()  # Ensure the environment is closed properly
-    run.finish()  # Finalize the WandB run
+    env.close()
+    eval_env.close()
+    run.finish()
