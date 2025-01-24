@@ -20,7 +20,7 @@ run = wandb.init(
 
 
 def make_env():
-    env = gym.make(config["env_name"])
+    env = gym.make(config["env_name"], render_mode="rgb_array")
     env = Monitor(env)  # record stats such as returns
     return env
 
