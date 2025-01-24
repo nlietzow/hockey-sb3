@@ -11,9 +11,9 @@ assert REGISTERED_ENVS, "Hockey environments are not registered."
 
 config = {
     "policy_type": "MlpPolicy",
-    "total_timesteps": 100_000,
+    "total_timesteps": 1_000_000,
     "env_name": "Hockey-One-v0",
-    "eval_freq": 10_000,
+    "eval_freq": 20_000,
     "n_eval_episodes": 10,
 }
 run = wandb.init(
