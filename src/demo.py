@@ -1,14 +1,17 @@
 import gymnasium as gym  # Using gymnasium instead of gym
 import wandb
+from hockey import REGISTERED_ENVS
 from stable_baselines3 import PPO
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv, VecVideoRecorder
 from wandb.integration.sb3 import WandbCallback
 
+assert REGISTERED_ENVS, "Environments are not registered in hockey."
+
 config = {
     "policy_type": "MlpPolicy",
     "total_timesteps": 25000,
-    "env_name": "CartPole-v1",
+    "env_name": "Hockey-One-v0",
 }
 run = wandb.init(
     project="hockey-sb3",
