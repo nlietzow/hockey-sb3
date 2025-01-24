@@ -1,5 +1,6 @@
 torch~=2.5.1
 stable-baselines3~=2.4.1
-wandb~=0.19.4
 gymnasium[other]~=1.0.0
+wandb
+tensorboard
 git+https://github.com/nlietzow/hockey-env.git
