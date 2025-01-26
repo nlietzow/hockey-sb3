@@ -7,7 +7,7 @@ from hockey import REGISTERED_ENVS
 from stable_baselines3 import SAC
 from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.vec_env import SubprocVecEnv, VecMonitor
+from stable_baselines3.common.vec_env import DummyVecEnv, VecMonitor
 
 BASE_DIR = Path(__file__).resolve().parent
 CHECKPOINTS_DIR = BASE_DIR / "checkpoints" / "sac"
@@ -16,7 +16,7 @@ BASE_CHECKPOINT = CHECKPOINTS_DIR / "hockey_sac_base.zip"
 assert REGISTERED_ENVS, "Hockey environments are not registered."
 assert BASE_CHECKPOINT.exists(), "Base checkpoint not found."
 
-N_ENVS = 8
+N_ENVS = 4
 
 
 def _make_env(checkpoint: Path | None, monitor: bool):
@@ -32,7 +32,7 @@ def _make_env(checkpoint: Path | None, monitor: bool):
 
 def make_eval_env():
     envs = [_make_env(BASE_CHECKPOINT, monitor=False) for _ in range(N_ENVS)]
-    vec_env = SubprocVecEnv(envs)
+    vec_env = DummyVecEnv(envs)
     vec_env = VecMonitor(vec_env)
 
     return vec_env
@@ -58,7 +58,7 @@ def make_parallel_envs(last_checkpoint: Path):
     while len(envs) < N_ENVS:
         envs.append(_make_env(BASE_CHECKPOINT, monitor=False))
 
-    vec_env = SubprocVecEnv(envs)
+    vec_env = DummyVecEnv(envs)
     vec_env = VecMonitor(vec_env)
 
     return vec_env
@@ -82,7 +82,7 @@ def main():
     # Load the model
     model = SAC.load(
         BASE_CHECKPOINT,
-        make_eval_env(),
+        eval_env,
         learning_rate=1e-4,
         tensorboard_log=f"logs/{run.id}",
         verbose=1,
