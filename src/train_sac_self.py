@@ -17,7 +17,7 @@ assert REGISTERED_ENVS, "Hockey environments are not registered."
 assert BASE_CHECKPOINT.exists(), "Base checkpoint not found."
 
 
-def make_single_env(checkpoint: Path | None):
+def _make_env(checkpoint: Path | None):
     def _init():
         env = gym.make("Hockey-One-v0", checkpoint=checkpoint)
         return Monitor(env)
@@ -25,13 +25,18 @@ def make_single_env(checkpoint: Path | None):
     return _init
 
 
+def make_single_env(checkpoint: Path):
+    env = DummyVecEnv([_make_env(checkpoint)])
+    return env
+
+
 def make_parallel_envs(last_checkpoint: Path):
     envs = [
-        make_single_env(None),
-        make_single_env(BASE_CHECKPOINT),
+        _make_env(None),
+        _make_env(BASE_CHECKPOINT),
     ]
     if last_checkpoint != BASE_CHECKPOINT:
-        envs.append(make_single_env(last_checkpoint))
+        envs.append(_make_env(last_checkpoint))
 
     all_checkpoints = set(CHECKPOINTS_DIR.glob("*.zip"))
     all_checkpoints.discard(BASE_CHECKPOINT)
@@ -40,9 +45,15 @@ def make_parallel_envs(last_checkpoint: Path):
     random.shuffle(all_checkpoints)
 
     for cp in all_checkpoints[:5]:
-        envs.append(make_single_env(cp))
+        envs.append(_make_env(cp))
 
-    return envs
+    while len(envs) < 8:
+        envs.append(_make_env(BASE_CHECKPOINT))
+
+    vec_env = SubprocVecEnv(envs)
+    vec_env = VecMonitor(vec_env)
+
+    return vec_env
 
 
 def main():
@@ -50,7 +61,7 @@ def main():
     run = wandb.init(project="hockey-sb3", sync_tensorboard=True)
 
     # Set up evaluation
-    eval_env = DummyVecEnv([make_single_env(BASE_CHECKPOINT)])
+    eval_env = make_single_env(BASE_CHECKPOINT)
     eval_callback = EvalCallback(
         eval_env,
         log_path=f"models/{run.id}/eval_logs",
@@ -61,17 +72,20 @@ def main():
     )
 
     # Load the model
+    vec_env = make_parallel_envs(BASE_CHECKPOINT)
     model = SAC.load(
-        BASE_CHECKPOINT, learning_rate=1e-4, tensorboard_log=f"logs/{run.id}", verbose=1
+        BASE_CHECKPOINT,
+        vec_env,
+        learning_rate=1e-4,
+        tensorboard_log=f"logs/{run.id}",
+        verbose=1
     )
 
     # Train the model
     last_checkpoint = BASE_CHECKPOINT
     for iteration in range(100):
         # Create parallel environments
-        envs = make_parallel_envs(last_checkpoint)
-        vec_env = SubprocVecEnv(envs)
-        vec_env = VecMonitor(vec_env)
+        vec_env = make_parallel_envs(last_checkpoint)
 
         # Train the model
         model.set_env(vec_env)
