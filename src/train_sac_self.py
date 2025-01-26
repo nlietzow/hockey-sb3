@@ -89,7 +89,7 @@ def main():
         )
         model.load_replay_buffer(last_checkpoint.with_suffix(".replay_buffer"))
 
-        model.learn(20_000, callback=[eval_callback])
+        model.learn(20_000, reset_num_timesteps=False, callback=[eval_callback])
 
         last_checkpoint = CHECKPOINTS_DIR / f"hockey_sac_{str(iteration).zfill(2)}.zip"
         model.save(last_checkpoint)
