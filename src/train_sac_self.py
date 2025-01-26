@@ -72,10 +72,9 @@ def main():
     )
 
     # Load the model
-    vec_env = make_parallel_envs(BASE_CHECKPOINT)
     model = SAC.load(
         BASE_CHECKPOINT,
-        vec_env,
+        make_parallel_envs(BASE_CHECKPOINT),
         learning_rate=1e-4,
         tensorboard_log=f"logs/{run.id}",
         verbose=1
