@@ -87,7 +87,10 @@ def main():
         model = SAC.load(
             last_checkpoint, env=vec_env, tensorboard_log=f"logs/{run.id}", verbose=1
         )
-        model.load_replay_buffer(last_checkpoint.with_suffix(".replay_buffer"))
+
+        replay_buffer = last_checkpoint.with_suffix(".replay_buffer")
+        if replay_buffer.exists():
+            model.load_replay_buffer(last_checkpoint.with_suffix(".replay_buffer"))
 
         model.learn(20_000, reset_num_timesteps=False, callback=[eval_callback])
 
