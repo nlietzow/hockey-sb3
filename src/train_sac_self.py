@@ -62,7 +62,7 @@ def main():
 
     # Load the model
     model = SAC.load(
-        BASE_CHECKPOINT, learning_rate=1e-4, tensorboard_log=f"logs/{run.id}"
+        BASE_CHECKPOINT, learning_rate=1e-4, tensorboard_log=f"logs/{run.id}", verbose=1
     )
 
     # Train the model
