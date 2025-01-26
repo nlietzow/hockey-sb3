@@ -14,7 +14,6 @@ CHECKPOINTS_DIR = BASE_DIR / "checkpoints" / "sac"
 BASE_CHECKPOINT = CHECKPOINTS_DIR / "hockey_sac_base.zip"
 
 assert REGISTERED_ENVS, "Hockey environments are not registered."
-assert BASE_CHECKPOINT.exists(), "Base checkpoint not found."
 
 N_ENVS = 4
 
@@ -31,7 +30,8 @@ def _make_env(checkpoint: Path | None, monitor: bool):
 
 
 def make_eval_env():
-    envs = [_make_env(BASE_CHECKPOINT, monitor=False) for _ in range(N_ENVS)]
+    envs = [_make_env(None, monitor=False) for _ in range(N_ENVS - 1)]
+    envs.append(_make_env(BASE_CHECKPOINT, monitor=False))
 
     vec_env = DummyVecEnv(envs)
     vec_env = VecMonitor(vec_env)
@@ -39,12 +39,10 @@ def make_eval_env():
     return vec_env
 
 
-def make_train_env(last_checkpoint: Path):
-    envs = [
-        _make_env(None, monitor=False),
-        _make_env(BASE_CHECKPOINT, monitor=False),
-    ]
-    if last_checkpoint != BASE_CHECKPOINT:
+def make_train_env(last_checkpoint: Path | None):
+    envs = [_make_env(None, monitor=False)]
+
+    if last_checkpoint is not None:
         envs.append(_make_env(last_checkpoint, monitor=False))
 
     all_checkpoints = set(CHECKPOINTS_DIR.glob("*.zip"))
@@ -80,25 +78,23 @@ def main():
         render=False,
     )
 
+    # Define the model
+    vec_env = make_train_env(None)
+    model = SAC("MlpPolicy", vec_env, verbose=1, tensorboard_log=f"logs/{run.id}")
+
     # Train the model
-    last_checkpoint = BASE_CHECKPOINT
+    last_checkpoint = None
     for iteration in range(50):
         vec_env = make_train_env(last_checkpoint)
-        model = SAC.load(
-            last_checkpoint, env=vec_env, tensorboard_log=f"logs/{run.id}", verbose=1
-        )
-
-        replay_buffer = last_checkpoint.with_suffix(".replay_buffer")
-        if replay_buffer.exists():
-            model.load_replay_buffer(last_checkpoint.with_suffix(".replay_buffer"))
-
+        model.set_env(vec_env)
         model.learn(20_000, reset_num_timesteps=False, callback=[eval_callback])
 
         last_checkpoint = CHECKPOINTS_DIR / f"hockey_sac_{str(iteration).zfill(2)}.zip"
         model.save(last_checkpoint)
-        model.save_replay_buffer(last_checkpoint.with_suffix(".replay_buffer"))
 
-    run.save(last_checkpoint)
+    if last_checkpoint is not None:
+        run.save(last_checkpoint)
+
     run.finish()
 
 
