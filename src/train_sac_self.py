@@ -82,6 +82,7 @@ def main():
         model.save(last_checkpoint)
 
     run.save(last_checkpoint)
+    run.finish()
 
 
 if __name__ == "__main__":
