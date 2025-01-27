@@ -46,7 +46,7 @@ def run_for_algo(
     config = {
         "algorithm": algo.__name__,
         "policy_type": "MlpPolicy",
-        "total_timesteps": 100_000,
+        "total_timesteps": 1_000_000,
     }
     run = wandb.init(
         project="hockey-benchmark",
@@ -55,12 +55,12 @@ def run_for_algo(
     )
 
     env, eval_env = make_env(), make_env()
-    model = algo(
-        config["policy_type"], env, verbose=1, tensorboard_log=f"logs/{run.id}"
-    )
     callback = get_callbacks(run.id, eval_env)
     success = False
     try:
+        model = algo(
+            config["policy_type"], env, verbose=1, tensorboard_log=f"logs/{run.id}"
+        )
         model.learn(
             total_timesteps=config["total_timesteps"],
             callback=callback,
