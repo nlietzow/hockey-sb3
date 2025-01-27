@@ -16,7 +16,8 @@ CHECKPOINTS_DIR = _base_dir / "checkpoints" / "sac"
 
 class UpdatePlayer2(BaseCallback):
     def _on_step(self) -> bool:
-        self.model.save(f"{str(self.num_timesteps).zfill(9)}.zip")
+        cp = CHECKPOINTS_DIR / f"{str(self.num_timesteps).zfill(9)}.zip"
+        self.model.save(cp)
         self.training_env.env_method("update_player2")
         return True
 
@@ -41,13 +42,13 @@ def get_wandb_callback(run_id: str, verbose: int = 2):
 
 
 def get_eval_callback(
-    run_id: str,
-    env: VecEnv,
-    eval_env: VecEnv,
-    eval_freq: int = 1_000,
-    n_eval_episodes: int = 10,
-    deterministic: bool = True,
-    render: bool = False,
+        run_id: str,
+        env: VecEnv,
+        eval_env: VecEnv,
+        eval_freq: int = 1_000,
+        n_eval_episodes: int = 10,
+        deterministic: bool = True,
+        render: bool = False,
 ):
     return EvalCallback(
         eval_env,
