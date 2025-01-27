@@ -1,11 +1,13 @@
 import gymnasium as gym
 import wandb
-from hockey import REGISTERED_ENVS
+from hockey import OpponentType, REGISTERED_ENVS
 from stable_baselines3 import SAC
 from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
+
+from utils import CHECKPOINTS_DIR
 
 assert REGISTERED_ENVS, "Hockey environments are not registered."
 
@@ -24,7 +26,11 @@ run = wandb.init(
 
 
 def make_env():
-    _env = gym.make(config["env_name"])
+    _env = gym.make(
+        config["env_name"],
+        opponent_type=OpponentType.rule_based,
+        checkpoint_dir=CHECKPOINTS_DIR,
+    )
     _env = Monitor(_env)  # record stats such as returns
     return _env
 

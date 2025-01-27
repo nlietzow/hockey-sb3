@@ -1,9 +1,8 @@
-from pathlib import Path
 from typing import Type, Union
 
 import gymnasium as gym
 import wandb
-from hockey import REGISTERED_ENVS
+from hockey import OpponentType, REGISTERED_ENVS
 from sb3_contrib import CrossQ, TQC
 from stable_baselines3 import DDPG, SAC, TD3
 from stable_baselines3.common.callbacks import CallbackList, EvalCallback
@@ -11,12 +10,18 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
+from utils import CHECKPOINTS_DIR
+
 assert REGISTERED_ENVS, "Hockey environments are not registered."
 
 
-def make_env(checkpoint: Path | None = None):
+def make_env():
     def init():
-        env = gym.make("Hockey-One-v0", checkpoint=checkpoint)
+        env = gym.make(
+            "Hockey-One-v0",
+            opponent_type=OpponentType.rule_based,
+            checkpoint_dir=CHECKPOINTS_DIR,
+        )
         env = Monitor(env)
         return env
 
