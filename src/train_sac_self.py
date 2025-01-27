@@ -25,6 +25,7 @@ def make_envs(train: bool):
         envs = [make_env(OpponentType(ot)) for ot in OpponentType]
     else:
         envs = [make_env(OpponentType.baseline) for _ in range(len(OpponentType))]
+
     vec_env = DummyVecEnv(envs)
     vec_env = VecMonitor(vec_env)
 
@@ -38,7 +39,7 @@ def main():
     callback = CallbackList(
         [
             get_wandb_callback(run.id),
-            get_eval_callback(run.id, eval_env),
+            get_eval_callback(run.id, env, eval_env),
             get_update2_callback(env),
         ]
     )

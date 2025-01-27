@@ -42,6 +42,7 @@ def get_wandb_callback(run_id: str, verbose: int = 2):
 
 def get_eval_callback(
     run_id: str,
+    env: VecEnv,
     eval_env: VecEnv,
     eval_freq: int = 1_000,
     n_eval_episodes: int = 10,
@@ -52,7 +53,7 @@ def get_eval_callback(
         eval_env,
         best_model_save_path=str(CHECKPOINTS_DIR / "best.zip"),
         log_path=f"models/{run_id}/eval_logs",
-        eval_freq=eval_freq,
+        eval_freq=eval_freq * env.num_envs,
         n_eval_episodes=n_eval_episodes,
         deterministic=deterministic,
         render=render,
