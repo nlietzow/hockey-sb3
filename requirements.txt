@@ -1,5 +1,6 @@
 torch~=2.5.1
 stable-baselines3~=2.4.1
+sb3-contrib~=2.4.0
 gymnasium[other]~=1.0.0
 wandb
 tensorboard
