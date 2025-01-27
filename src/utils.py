@@ -52,7 +52,7 @@ def get_eval_callback(
 ):
     return EvalCallback(
         eval_env,
-        best_model_save_path=str(CHECKPOINTS_DIR / "best.zip"),
+        best_model_save_path=str(CHECKPOINTS_DIR),
         log_path=f"models/{run_id}/eval_logs",
         eval_freq=eval_freq * env.num_envs,
         n_eval_episodes=n_eval_episodes,
