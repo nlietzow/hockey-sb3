@@ -9,9 +9,23 @@ from stable_baselines3.common.callbacks import CallbackList
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv
 
-from utils import CHECKPOINTS_DIR, get_eval_callback, get_wandb_callback
+from callbacks import get_eval_callback, get_wandb_callback
 
 assert REGISTERED_ENVS, "Hockey environments are not registered."
+
+POLICY_TYPE = "MlpPolicy"
+TOTAL_TIME_STEPS = 1_000_000
+
+Algorithm = Union[
+    Type[DDPG],
+    Type[SAC],
+    Type[TD3],
+    Type[CrossQ],
+    Type[TQC],
+    Type[PPO],
+    Type[A2C],
+    Type[TRPO],
+]
 
 
 def make_env():
@@ -23,22 +37,11 @@ def make_env():
     return DummyVecEnv([init])
 
 
-def run_for_algo(
-    algo: Union[
-        Type[DDPG],
-        Type[SAC],
-        Type[TD3],
-        Type[CrossQ],
-        Type[TQC],
-        Type[PPO],
-        Type[A2C],
-        Type[TRPO],
-    ]
-):
+def run_for_algo(algorithm: Algorithm):
     config = {
-        "algorithm": algo.__name__,
-        "policy_type": "MlpPolicy",
-        "total_timesteps": 1_000_000,
+        "algorithm": algorithm.__name__,
+        "policy_type": POLICY_TYPE,
+        "total_timesteps": TOTAL_TIME_STEPS,
     }
     run = wandb.init(
         project="hockey-benchmark",
@@ -55,7 +58,7 @@ def run_for_algo(
     )
     success = False
     try:
-        model = algo(
+        model = algorithm(
             config["policy_type"], env, verbose=1, tensorboard_log=f"logs/{run.id}"
         )
         model.learn(
