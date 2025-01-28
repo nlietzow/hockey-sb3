@@ -72,9 +72,9 @@ def make_eval_env():
 
 
 def main():
-    run = wandb.init(project="hockey-sb3", sync_tensorboard=True)
+    run = wandb.init(project="cross_q-self-play", sync_tensorboard=True)
     checkpoint_dir = CROSS_Q_DIR / run.id
-    checkpoint_dir.mkdir(parents=True, exist_ok=True)
+    checkpoint_dir.mkdir(exist_ok=True)
 
     env = make_train_env(checkpoint_dir)
     eval_env = make_eval_env()
