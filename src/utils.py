@@ -42,13 +42,13 @@ def get_wandb_callback(run_id: str, verbose: int = 2):
 
 
 def get_eval_callback(
-        run_id: str,
-        env: VecEnv,
-        eval_env: VecEnv,
-        eval_freq: int = 1_000,
-        n_eval_episodes: int = 10,
-        deterministic: bool = True,
-        render: bool = False,
+    run_id: str,
+    env: VecEnv,
+    eval_env: VecEnv,
+    eval_freq: int = 1_000,
+    n_eval_episodes: int = 10,
+    deterministic: bool = True,
+    render: bool = False,
 ):
     return EvalCallback(
         eval_env,

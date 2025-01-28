@@ -3,14 +3,13 @@ from typing import Type, Union
 import gymnasium as gym
 import wandb
 from hockey import OpponentType, REGISTERED_ENVS
-from sb3_contrib import CrossQ, TQC
-from stable_baselines3 import DDPG, SAC, TD3
-from stable_baselines3.common.callbacks import CallbackList, EvalCallback
+from sb3_contrib import CrossQ, TQC, TRPO
+from stable_baselines3 import A2C, DDPG, PPO, SAC, TD3
+from stable_baselines3.common.callbacks import CallbackList
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv
-from wandb.integration.sb3 import WandbCallback
 
-from utils import CHECKPOINTS_DIR
+from utils import CHECKPOINTS_DIR, get_eval_callback, get_wandb_callback
 
 assert REGISTERED_ENVS, "Hockey environments are not registered."
 
@@ -28,25 +27,17 @@ def make_env():
     return DummyVecEnv([init])
 
 
-def get_callbacks(run_id: str, eval_env: DummyVecEnv):
-    eval_callback = EvalCallback(
-        eval_env,
-        best_model_save_path=f"models/{run_id}/best_model",
-        log_path=f"models/{run_id}/eval_logs",
-        eval_freq=1_000,
-        n_eval_episodes=10,
-        deterministic=True,
-        render=False,
-    )
-    wandb_callback = WandbCallback(
-        model_save_path=f"models/{run_id}",
-        verbose=2,
-    )
-    return CallbackList([eval_callback, wandb_callback])
-
-
 def run_for_algo(
-    algo: Union[Type[DDPG], Type[SAC], Type[TD3], Type[CrossQ], Type[TQC]]
+    algo: Union[
+        Type[DDPG],
+        Type[SAC],
+        Type[TD3],
+        Type[CrossQ],
+        Type[TQC],
+        Type[PPO],
+        Type[A2C],
+        Type[TRPO],
+    ]
 ):
     config = {
         "algorithm": algo.__name__,
@@ -60,7 +51,12 @@ def run_for_algo(
     )
 
     env, eval_env = make_env(), make_env()
-    callback = get_callbacks(run.id, eval_env)
+    callback = CallbackList(
+        [
+            get_wandb_callback(run.id),
+            get_eval_callback(run.id, env, eval_env),
+        ]
+    )
     success = False
     try:
         model = algo(
@@ -77,7 +73,8 @@ def run_for_algo(
         run.finish(exit_code=0 if success else 1)
 
 
-def main():
+def run_off_policy():
+    # run for off-policy algorithms
     for algo in (DDPG, SAC, TD3, CrossQ, TQC):
         try:
             run_for_algo(algo)
@@ -85,5 +82,14 @@ def main():
             print(f"Error during {algo} training:", e)
 
 
+def run_on_policy():
+    # run for on-policy algorithms
+    for algo in (PPO, A2C, TRPO):
+        try:
+            run_for_algo(algo)
+        except Exception as e:
+            print(f"Error during {algo} training:", e)
+
+
 if __name__ == "__main__":
-    main()
+    run_on_policy()
