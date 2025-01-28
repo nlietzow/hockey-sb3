@@ -2,7 +2,7 @@ from typing import Type, Union
 
 import gymnasium as gym
 import wandb
-from hockey import OpponentType, REGISTERED_ENVS
+from hockey import REGISTERED_ENVS
 from sb3_contrib import CrossQ, TQC, TRPO
 from stable_baselines3 import A2C, DDPG, PPO, SAC, TD3
 from stable_baselines3.common.callbacks import CallbackList
@@ -16,11 +16,7 @@ assert REGISTERED_ENVS, "Hockey environments are not registered."
 
 def make_env():
     def init():
-        env = gym.make(
-            "Hockey-One-v0",
-            opponent_type=OpponentType.rule_based,
-            checkpoint_dir=CHECKPOINTS_DIR,
-        )
+        env = gym.make("Hockey-One-v0")
         env = Monitor(env)
         return env
 

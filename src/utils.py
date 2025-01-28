@@ -22,11 +22,16 @@ class UpdatePlayer2(BaseCallback):
         return True
 
 
-def make_env(opponent_type: OpponentType, checkpoint_dir: Path = CHECKPOINTS_DIR):
+def make_env(
+        opponent_type: OpponentType = OpponentType.rule_based,
+        baseline_path: Path = None,
+        checkpoint_dir: Path = None,
+):
     def _init():
         env = gym.make(
             "Hockey-One-v0",
             opponent_type=opponent_type,
+            baseline_path=baseline_path,
             checkpoint_dir=checkpoint_dir,
         )
         return env
