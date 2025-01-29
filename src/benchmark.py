@@ -26,28 +26,27 @@ Algorithm = Union[
 
 
 def run_for_algo(algorithm: Algorithm):
-    run = wandb.init(
-        project="hockey-benchmark",
-        sync_tensorboard=True,
-    )
-
     env = make_vec_env("Hockey-One-v0", n_envs=NUM_ENVS)
     eval_env = make_vec_env("Hockey-One-v0", n_envs=NUM_ENVS)
 
-    callback = CallbackList(
-        [
-            get_wandb_callback(run.id),
-            get_eval_callback(run.id, env, eval_env),
-            get_early_stopping_callback(env),
-        ]
-    )
+    # run = wandb.init(
+    #     project="hockey-benchmark",
+    #     sync_tensorboard=True,
+    # )
+    # callback = CallbackList(
+    #     [
+    #         get_wandb_callback(run.id),
+    #         get_eval_callback(run.id, env, eval_env),
+    #         get_early_stopping_callback(env),
+    #     ]
+    # )
     success = False
     try:
         model = algorithm(
             POLICY_TYPE,
             env,
             verbose=1,
-            tensorboard_log=f"logs/{run.id}",
+            # tensorboard_log=f"logs/{run.id}",
         )
         print(f"Model running on device: {model.policy.device}")
         # model.learn(
@@ -55,10 +54,12 @@ def run_for_algo(algorithm: Algorithm):
         #     callback=callback,
         # )
         success = True
+    except Exception as e:
+        print(f"Error during {algorithm} training:", e)
     finally:
         env.close()
         eval_env.close()
-        run.finish(exit_code=0 if success else 1)
+        # run.finish(exit_code=0 if success else 1)
 
 
 def run_off_policy():
