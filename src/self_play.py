@@ -60,10 +60,7 @@ def make_eval_env():
         for _ in range(4)
     ]
 
-    vec_env = DummyVecEnv(envs)
-    vec_env = VecMonitor(vec_env)
-
-    return vec_env
+    return DummyVecEnv(envs)
 
 
 def main():
