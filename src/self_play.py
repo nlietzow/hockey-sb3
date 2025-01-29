@@ -18,10 +18,10 @@ BASELINE_PATH = CHECKPOINTS_DIR / "cross_q" / "model.zip"
 
 
 def _make_env(
-    opponent_type: OpponentType = OpponentType.rule_based,
-    algorithm_cls: Algorithm = None,
-    checkpoint_path: Path = None,
-    checkpoint_dir: Path = None,
+        opponent_type: OpponentType = OpponentType.rule_based,
+        algorithm_cls: Algorithm = None,
+        checkpoint_path: Path = None,
+        checkpoint_dir: Path = None,
 ):
     def _init():
         env = gym.make(
@@ -44,8 +44,17 @@ def make_train_env(checkpoint_dir: Path):
             checkpoint_path=BASELINE_PATH,
             checkpoint_dir=checkpoint_dir,
         )
-        for ot in list(OpponentType) * 4
+        for ot in list(OpponentType)
     ]
+    envs.extend(
+        _make_env(
+            OpponentType.latest,
+            CrossQ,
+            checkpoint_path=BASELINE_PATH,
+            checkpoint_dir=checkpoint_dir,
+        )
+        for _ in range(4)
+    )
 
     return DummyVecEnv(envs)
 
