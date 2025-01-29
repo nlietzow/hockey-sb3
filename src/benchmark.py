@@ -11,8 +11,8 @@ from callbacks import get_eval_callback, get_wandb_callback
 assert REGISTERED_ENVS, "Hockey environments are not registered."
 
 POLICY_TYPE = "MlpPolicy"
-TOTAL_TIME_STEPS = 2_000_000
 NUM_ENVS = 4
+TOTAL_TIME_STEPS = 2_000_000
 
 Algorithm = Union[
     Type[DDPG],
@@ -41,9 +41,7 @@ def run_for_algo(algorithm: Algorithm):
     )
     success = False
     try:
-        model = algorithm(
-            POLICY_TYPE, env, verbose=1, tensorboard_log=f"logs/{run.id}"
-        )
+        model = algorithm(POLICY_TYPE, env, verbose=1, tensorboard_log=f"logs/{run.id}")
         model.learn(
             total_timesteps=TOTAL_TIME_STEPS,
             callback=callback,
