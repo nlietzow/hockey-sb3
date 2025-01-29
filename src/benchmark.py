@@ -48,8 +48,8 @@ def run_for_algo(algorithm: Algorithm):
             env,
             verbose=1,
             tensorboard_log=f"logs/{run.id}",
-            device="cuda:0",
         )
+        print(f"Model running on device: {model.policy.device}")
         model.learn(
             total_timesteps=TOTAL_TIME_STEPS,
             callback=callback,
@@ -79,5 +79,12 @@ def run_on_policy():
 
 
 if __name__ == "__main__":
+    import torch
+    import os
+
+    print(os.environ.get("CUDA_VISIBLE_DEVICES"))
+    print(torch.cuda)
+    print(f"CUDA Available: {torch.cuda.is_available()}")
+
     run_off_policy()
     run_on_policy()
