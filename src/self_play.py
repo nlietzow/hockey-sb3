@@ -12,12 +12,13 @@ from stable_baselines3.common.callbacks import (
 from stable_baselines3.common.vec_env import DummyVecEnv, VecMonitor
 
 from callbacks import get_eval_callback, get_update2_callback, get_wandb_callback
-from utils import CROSS_Q_DIR
+from utils import CHECKPOINTS_DIR
 
 assert REGISTERED_ENVS, "Hockey environments are not registered."
 
-TOTAL_TIME_STEPS = 2_000_000
-BASELINE_PATH = CROSS_Q_DIR / "baseline.zip"
+TOTAL_TIME_STEPS = 1_000_000
+BASELINE_PATH = CHECKPOINTS_DIR / "cross_q" / "model.zip"
+assert BASELINE_PATH.exists(), "Baseline model not found."
 
 
 def _make_env(
@@ -47,7 +48,7 @@ def make_train_env(checkpoint_dir: Path):
             checkpoint_path=BASELINE_PATH,
             checkpoint_dir=checkpoint_dir,
         )
-        for ot in list(OpponentType) * 2
+        for ot in list(OpponentType) * 4
     ]
 
     vec_env = DummyVecEnv(envs)
@@ -61,9 +62,9 @@ def make_eval_env():
         _make_env(
             OpponentType.checkpoint,
             CrossQ,
-            checkpoint_path=CROSS_Q_DIR / "baseline.zip",
+            checkpoint_path=BASELINE_PATH,
         )
-        for _ in range(len(OpponentType) * 2)
+        for _ in range(4)
     ]
 
     vec_env = DummyVecEnv(envs)
@@ -74,7 +75,7 @@ def make_eval_env():
 
 def main():
     run = wandb.init(project="cross_q-self-play", sync_tensorboard=True)
-    checkpoint_dir = CROSS_Q_DIR / run.id
+    checkpoint_dir = BASELINE_PATH.parent / run.id
     checkpoint_dir.mkdir(exist_ok=True)
 
     env = make_train_env(checkpoint_dir)
@@ -86,7 +87,7 @@ def main():
                 run.id,
                 env,
                 eval_env,
-                checkpoint_dir,
+                checkpoint_dir=checkpoint_dir,
             ),
             get_update2_callback(env, checkpoint_dir),
         ]

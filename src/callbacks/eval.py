@@ -1,16 +1,32 @@
+import pickle
 from pathlib import Path
 
 from stable_baselines3.common.callbacks import (
+    BaseCallback,
+    CallbackList,
     EvalCallback,
     StopTrainingOnRewardThreshold,
 )
 from stable_baselines3.common.vec_env import VecEnv
 
 
+class SaveBestModelParameters(BaseCallback):
+    def __init__(self, checkpoint_dir: Path):
+        super().__init__()
+        self.checkpoint_dir = checkpoint_dir
+
+    def _on_step(self) -> bool:
+        with open(self.checkpoint_dir / "best_model.pkl", "wb") as f:
+            pickle.dump(self.model.get_parameters(), f)
+
+        return True
+
+
 def get_eval_callback(
     run_id: str,
     env: VecEnv,
     eval_env: VecEnv,
+    *,
     checkpoint_dir: Path | None = None,
     eval_freq: int = 1_000,
     n_eval_episodes: int = 10,
@@ -21,12 +37,18 @@ def get_eval_callback(
     if checkpoint_dir:
         checkpoint_dir = checkpoint_dir.resolve()
 
+    callbacks = []
+    if checkpoint_dir is not None:
+        callbacks.append(SaveBestModelParameters(checkpoint_dir))
+
     if stop_training_on_reward is not None:
-        callback_on_best = StopTrainingOnRewardThreshold(
-            reward_threshold=stop_training_on_reward, verbose=1
+        callbacks.append(
+            StopTrainingOnRewardThreshold(
+                reward_threshold=stop_training_on_reward, verbose=1
+            )
         )
-    else:
-        callback_on_best = None
+
+    callback_on_new_best = CallbackList(callbacks) if callbacks else None
 
     return EvalCallback(
         eval_env,
@@ -36,5 +58,5 @@ def get_eval_callback(
         n_eval_episodes=n_eval_episodes,
         deterministic=deterministic,
         render=render,
-        callback_on_new_best=callback_on_best,
+        callback_on_new_best=callback_on_new_best,
     )

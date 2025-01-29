@@ -37,7 +37,10 @@ def run_for_algo(algorithm: Algorithm):
         [
             get_wandb_callback(run.id),
             get_eval_callback(
-                run.id, env, eval_env, stop_training_on_reward=STOP_TRAINING_ON_REWARD
+                run.id,
+                env,
+                eval_env,
+                stop_training_on_reward=STOP_TRAINING_ON_REWARD,
             ),
         ]
     )

@@ -1,3 +1,4 @@
+import pickle
 from pathlib import Path
 
 from stable_baselines3.common.callbacks import BaseCallback, EveryNTimesteps
@@ -14,8 +15,11 @@ class UpdatePlayer2(BaseCallback):
         self.checkpoint_dir = checkpoint_dir
 
     def _on_step(self) -> bool:
-        cp = self.checkpoint_dir / f"{str(self.num_timesteps).zfill(9)}.zip"
-        self.model.save(cp)
+        with open(
+            self.checkpoint_dir / f"{str(self.num_timesteps).zfill(9)}.pkl", "wb"
+        ) as f:
+            pickle.dump(self.model.get_parameters(), f)
+
         self.training_env.env_method("update_player2")
         return True
 
@@ -23,7 +27,7 @@ class UpdatePlayer2(BaseCallback):
 def get_update2_callback(
     env: VecEnv,
     checkpoint_dir: Path,
-    n_steps: int = 20_000,
+    n_steps: int = 10_000,
 ):
     """
     Get the callback to update the opponent player after every n steps
