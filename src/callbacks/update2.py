@@ -10,8 +10,8 @@ class UpdatePlayer2(BaseCallback):
     Save the model as a checkpoint and call the update_player2 method of the environment
     """
 
-    def __init__(self, checkpoint_dir: Path, min_steps: int = 1_000):
-        super().__init__()
+    def __init__(self, checkpoint_dir: Path, min_steps: int = 1_000, verbose: int = 1):
+        super().__init__(verbose=verbose)
         self.checkpoint_dir = checkpoint_dir
         self._min_steps = min_steps
 
@@ -22,8 +22,7 @@ class UpdatePlayer2(BaseCallback):
             pickle.dump(params, f)
 
         if self.n_calls > self._min_steps:
-            self.logger.info("Triggering update_player2 method.")
-            self.training_env.env_method("update_player2", logger=self.logger)
+            self.training_env.env_method("update_player2", verbose=self.verbose)
 
         return True
 
@@ -32,19 +31,9 @@ def get_update2_callback(
     env: VecEnv,
     checkpoint_dir: Path,
     n_steps: int = 10_000,
+    verbose: int = 1,
 ):
-    """
-    Get the callback to update the opponent player after every n steps
-    :param env:
-    :type env:
-    :param checkpoint_dir:
-    :type checkpoint_dir:
-    :param n_steps:
-    :type n_steps:
-    :return:
-    :rtype:
-    """
     return EveryNTimesteps(
         n_steps=n_steps * env.num_envs,
-        callback=UpdatePlayer2(checkpoint_dir=checkpoint_dir),
+        callback=UpdatePlayer2(checkpoint_dir=checkpoint_dir, verbose=verbose),
     )
