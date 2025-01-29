@@ -1,6 +1,9 @@
 from pathlib import Path
 
-from stable_baselines3.common.callbacks import EvalCallback
+from stable_baselines3.common.callbacks import (
+    EvalCallback,
+    StopTrainingOnRewardThreshold,
+)
 from stable_baselines3.common.vec_env import VecEnv
 
 
@@ -11,11 +14,19 @@ def get_eval_callback(
     checkpoint_dir: Path | None = None,
     eval_freq: int = 1_000,
     n_eval_episodes: int = 10,
+    stop_training_on_reward: float | None = None,
     deterministic: bool = True,
     render: bool = False,
 ):
     if checkpoint_dir:
         checkpoint_dir = checkpoint_dir.resolve()
+
+    if stop_training_on_reward is not None:
+        callback_on_best = StopTrainingOnRewardThreshold(
+            reward_threshold=stop_training_on_reward, verbose=1
+        )
+    else:
+        callback_on_best = None
 
     return EvalCallback(
         eval_env,
@@ -25,4 +36,5 @@ def get_eval_callback(
         n_eval_episodes=n_eval_episodes,
         deterministic=deterministic,
         render=render,
+        callback_on_new_best=callback_on_best,
     )

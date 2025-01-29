@@ -7,13 +7,13 @@ from stable_baselines3.common.callbacks import CallbackList
 from stable_baselines3.common.env_util import make_vec_env
 
 from callbacks import get_eval_callback, get_wandb_callback
-from callbacks.stop_early import get_early_stopping_callback
 
 assert REGISTERED_ENVS, "Hockey environments are not registered."
 
 POLICY_TYPE = "MlpPolicy"
 NUM_ENVS = 4
 TOTAL_TIME_STEPS = 4_000_000
+STOP_TRAINING_ON_REWARD = 9.5
 
 Algorithm = Union[
     Type[DDPG],
@@ -36,8 +36,9 @@ def run_for_algo(algorithm: Algorithm):
     callback = CallbackList(
         [
             get_wandb_callback(run.id),
-            get_eval_callback(run.id, env, eval_env),
-            get_early_stopping_callback(env),
+            get_eval_callback(
+                run.id, env, eval_env, stop_training_on_reward=STOP_TRAINING_ON_REWARD
+            ),
         ]
     )
     success = False
