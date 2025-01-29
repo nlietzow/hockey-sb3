@@ -22,6 +22,7 @@ def _make_env(
         algorithm_cls: Algorithm = None,
         checkpoint_path: Path = None,
         checkpoint_dir: Path = None,
+        print_init_type: bool = False,
 ):
     def _init():
         env = gym.make(
@@ -30,6 +31,7 @@ def _make_env(
             algorithm_cls=algorithm_cls,
             checkpoint_path=checkpoint_path,
             checkpoint_dir=checkpoint_dir,
+            print_init_type=print_init_type,
         )
         return Monitor(env)
 
@@ -43,6 +45,7 @@ def make_train_env(checkpoint_dir: Path):
             CrossQ,
             checkpoint_path=BASELINE_PATH,
             checkpoint_dir=checkpoint_dir,
+            print_init_type=True,
         )
         for ot in list(OpponentType)
     ]
@@ -52,6 +55,7 @@ def make_train_env(checkpoint_dir: Path):
             CrossQ,
             checkpoint_path=BASELINE_PATH,
             checkpoint_dir=checkpoint_dir,
+            print_init_type=True,
         )
         for _ in range(4)
     )

@@ -9,7 +9,7 @@ class UpdatePlayer2(BaseCallback):
     Save the model as a checkpoint and call the update_player2 method of the environment
     """
 
-    def __init__(self, checkpoint_dir: Path, verbose: int = 1):
+    def __init__(self, checkpoint_dir: Path, verbose: int = 0):
         super().__init__(verbose=verbose)
         self.checkpoint_dir = checkpoint_dir
 
@@ -26,6 +26,6 @@ class UpdatePlayer2(BaseCallback):
         if self.verbose > 0:
             print(f"Updating player2 at step {self.num_timesteps}")
 
-        self.training_env.env_method("update_player2", verbose=self.verbose)
+        self.training_env.env_method("update_player2")
 
         return True
