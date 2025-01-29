@@ -16,7 +16,7 @@ from utils import CROSS_Q_DIR
 
 assert REGISTERED_ENVS, "Hockey environments are not registered."
 
-TOTAL_TIME_STEPS = 1_000_000
+TOTAL_TIME_STEPS = 2_000_000
 BASELINE_PATH = CROSS_Q_DIR / "baseline.zip"
 
 
@@ -87,7 +87,6 @@ def main():
                 env,
                 eval_env,
                 checkpoint_dir,
-                stop_training_on_reward=9.5,
             ),
             get_update2_callback(env, checkpoint_dir),
         ]
