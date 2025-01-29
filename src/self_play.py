@@ -79,7 +79,7 @@ def main():
         sync_tensorboard=True,
         settings=wandb.Settings(silent=True),
     )
-    checkpoint_dir = BASELINE_PATH.parent / run.id
+    checkpoint_dir = BASELINE_PATH.parent / run.name
     checkpoint_dir.mkdir(exist_ok=True)
 
     env = make_train_env(checkpoint_dir)
