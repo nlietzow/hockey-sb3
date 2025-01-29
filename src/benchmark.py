@@ -15,13 +15,15 @@ STOP_TRAINING_ON_REWARD = 9.5
 
 
 def run_for_algo(algorithm: Algorithm, n_envs: int = 4):
+    run = wandb.init(
+        project="cross_q-self-play",
+        sync_tensorboard=True,
+        settings=wandb.Settings(silent=True),
+    )
+
     env = make_vec_env("Hockey-One-v0", n_envs=n_envs)
     eval_env = make_vec_env("Hockey-One-v0", n_envs=n_envs)
 
-    run = wandb.init(
-        project="hockey-benchmark",
-        sync_tensorboard=True,
-    )
     callback = CallbackList(
         [
             get_wandb_callback(run.id),
@@ -37,7 +39,7 @@ def run_for_algo(algorithm: Algorithm, n_envs: int = 4):
         model = algorithm(
             algorithm.policy_aliases[POLICY_TYPE],
             env=env,
-            verbose=1,
+            verbose=False,
             tensorboard_log=f"logs/{run.id}",
         )
         model.learn(
@@ -51,8 +53,7 @@ def run_for_algo(algorithm: Algorithm, n_envs: int = 4):
         run.finish(exit_code=int(not success))
 
 
-def run_off_policy():
-    # run for off-policy algorithms
+def main():
     for algo in (CrossQ, SAC, TQC, TD3, DDPG):
         try:
             run_for_algo(algo)
@@ -61,4 +62,4 @@ def run_off_policy():
 
 
 if __name__ == "__main__":
-    run_off_policy()
+    main()

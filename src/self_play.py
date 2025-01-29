@@ -70,7 +70,7 @@ def main():
         settings=wandb.Settings(silent=True),
     )
     checkpoint_dir = BASELINE_PATH.parent / run.name
-    checkpoint_dir.mkdir(exist_ok=True)
+    checkpoint_dir.mkdir()
 
     env = make_train_env(checkpoint_dir)
     eval_env = make_eval_env()
