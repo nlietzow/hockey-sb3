@@ -108,7 +108,6 @@ def main():
             total_timesteps=TOTAL_TIME_STEPS * env.num_envs,
             reset_num_timesteps=False,
             callback=callback,
-            progress_bar=True
         )
         success = True
     finally:
