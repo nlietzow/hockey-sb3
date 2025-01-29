@@ -15,9 +15,13 @@ class UpdatePlayer2(BaseCallback):
 
     def _on_step(self) -> bool:
         params = self.model.get_parameters()
-        fp = self.checkpoint_dir / f"{str(self.num_timesteps).zfill(9)}.pkl"
-        with open(fp, "wb") as f:
-            pickle.dump(params, f)
+        fps = [
+            self.checkpoint_dir / "latest.pkl",
+            self.checkpoint_dir / f"{str(self.num_timesteps).zfill(9)}.pkl",
+        ]
+        for fp in fps:
+            with open(fp, "wb") as f:
+                pickle.dump(params, f)
 
         if self.verbose > 0:
             print(f"Updating player2 at step {self.num_timesteps}")

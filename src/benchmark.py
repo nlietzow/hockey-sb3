@@ -1,33 +1,22 @@
-from typing import Type, Union
-
 import wandb
 from hockey import REGISTERED_ENVS
-from sbx import CrossQ, DDPG, PPO, SAC, TD3, TQC
+from sbx import CrossQ, DDPG, SAC, TD3, TQC
 from stable_baselines3.common.callbacks import CallbackList
 from stable_baselines3.common.env_util import make_vec_env
 
 from callbacks import get_eval_callback, get_wandb_callback
+from utils import Algorithm
 
 assert REGISTERED_ENVS, "Hockey environments are not registered."
 
 POLICY_TYPE = "MlpPolicy"
-NUM_ENVS = 4
-TOTAL_TIME_STEPS = 4_000_000
+TOTAL_TIME_STEPS = 2_000_000
 STOP_TRAINING_ON_REWARD = 9.5
 
-Algorithm = Union[
-    Type[DDPG],
-    Type[SAC],
-    Type[TD3],
-    Type[CrossQ],
-    Type[TQC],
-    Type[PPO],
-]
 
-
-def run_for_algo(algorithm: Algorithm):
-    env = make_vec_env("Hockey-One-v0", n_envs=NUM_ENVS)
-    eval_env = make_vec_env("Hockey-One-v0", n_envs=NUM_ENVS)
+def run_for_algo(algorithm: Algorithm, n_envs: int = 4):
+    env = make_vec_env("Hockey-One-v0", n_envs=n_envs)
+    eval_env = make_vec_env("Hockey-One-v0", n_envs=n_envs)
 
     run = wandb.init(
         project="hockey-benchmark",
@@ -38,7 +27,6 @@ def run_for_algo(algorithm: Algorithm):
             get_wandb_callback(run.id),
             get_eval_callback(
                 run.id,
-                env,
                 eval_env,
                 stop_training_on_reward=STOP_TRAINING_ON_REWARD,
             ),
@@ -47,8 +35,8 @@ def run_for_algo(algorithm: Algorithm):
     success = False
     try:
         model = algorithm(
-            POLICY_TYPE,
-            env,
+            algorithm.policy_aliases[POLICY_TYPE],
+            env=env,
             verbose=1,
             tensorboard_log=f"logs/{run.id}",
         )
@@ -60,7 +48,7 @@ def run_for_algo(algorithm: Algorithm):
     finally:
         env.close()
         eval_env.close()
-        run.finish(exit_code=0 if success else 1)
+        run.finish(exit_code=int(not success))
 
 
 def run_off_policy():
@@ -72,17 +60,5 @@ def run_off_policy():
             print(f"Error during {algo} training:", e)
 
 
-def run_on_policy():
-    algo = PPO
-    try:
-        run_for_algo(algo)
-    except Exception as e:
-        print(f"Error during {algo} training:", e)
-
-
 if __name__ == "__main__":
-    import torch
-    import os
-
     run_off_policy()
-    run_on_policy()

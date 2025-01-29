@@ -1,1 +1,1 @@
-from .utils import CHECKPOINTS_DIR
+from .utils import CHECKPOINTS_DIR, Algorithm
