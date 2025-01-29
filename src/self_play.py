@@ -6,7 +6,7 @@ from hockey import OpponentType, REGISTERED_ENVS
 from sbx import CrossQ
 from stable_baselines3.common.callbacks import CallbackList
 from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.vec_env import DummyVecEnv, VecMonitor
+from stable_baselines3.common.vec_env import DummyVecEnv
 
 from callbacks import get_eval_callback, get_wandb_callback
 from utils import Algorithm, CHECKPOINTS_DIR
