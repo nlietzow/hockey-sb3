@@ -81,7 +81,13 @@ def main():
     callback = CallbackList(
         [
             get_wandb_callback(run.id),
-            get_eval_callback(run.id, env, eval_env, checkpoint_dir),
+            get_eval_callback(
+                run.id,
+                env,
+                eval_env,
+                checkpoint_dir,
+                stop_training_on_reward=9.5,
+            ),
             get_update2_callback(env, checkpoint_dir),
         ]
     )
