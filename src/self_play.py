@@ -17,6 +17,7 @@ from utils import CROSS_Q_DIR
 assert REGISTERED_ENVS, "Hockey environments are not registered."
 
 TOTAL_TIME_STEPS = 1_000_000
+BASELINE_PATH = CROSS_Q_DIR / "baseline.zip"
 
 
 def _make_env(
@@ -43,7 +44,7 @@ def make_train_env(checkpoint_dir: Path):
         _make_env(
             OpponentType(ot),
             CrossQ,
-            checkpoint_path=CROSS_Q_DIR / "baseline_v2.zip",
+            checkpoint_path=BASELINE_PATH,
             checkpoint_dir=checkpoint_dir,
         )
         for ot in list(OpponentType) * 2
@@ -94,7 +95,7 @@ def main():
     success = False
     try:
         model = CrossQ.load(
-            CROSS_Q_DIR / "baseline_v2.zip",
+            BASELINE_PATH,
             env,
             verbose=1,
             tensorboard_log=f"logs/{run.id}",
