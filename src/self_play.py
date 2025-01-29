@@ -43,7 +43,7 @@ def make_train_env(checkpoint_dir: Path):
         _make_env(
             OpponentType(ot),
             CrossQ,
-            checkpoint_path=CROSS_Q_DIR / "baseline.zip",
+            checkpoint_path=CROSS_Q_DIR / "baseline_v2.zip",
             checkpoint_dir=checkpoint_dir,
         )
         for ot in list(OpponentType) * 2
@@ -94,7 +94,7 @@ def main():
     success = False
     try:
         model = CrossQ.load(
-            CROSS_Q_DIR / "baseline.zip",
+            CROSS_Q_DIR / "baseline_v2.zip",
             env,
             verbose=1,
             tensorboard_log=f"logs/{run.id}",
