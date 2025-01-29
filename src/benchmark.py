@@ -43,7 +43,13 @@ def run_for_algo(algorithm: Algorithm):
     )
     success = False
     try:
-        model = algorithm(POLICY_TYPE, env, verbose=1, tensorboard_log=f"logs/{run.id}")
+        model = algorithm(
+            POLICY_TYPE,
+            env,
+            verbose=1,
+            tensorboard_log=f"logs/{run.id}",
+            device="cuda:0",
+        )
         model.learn(
             total_timesteps=TOTAL_TIME_STEPS,
             callback=callback,

@@ -13,12 +13,12 @@ class StopTrainingOnSuccessRate(BaseCallback):
     """
 
     def __init__(
-            self,
-            env: VecEnv,
-            success_threshold: float = 0.95,
-            min_steps: int = 10_000,
-            consecutive_steps: int = 1_000,
-            verbose: int = 1
+        self,
+        env: VecEnv,
+        success_threshold: float = 0.95,
+        min_steps: int = 10_000,
+        consecutive_steps: int = 1_000,
+        verbose: int = 1,
     ):
         super().__init__(verbose)
         self.success_threshold = success_threshold
@@ -54,5 +54,7 @@ class StopTrainingOnSuccessRate(BaseCallback):
         return True  # Continue training
 
 
-def get_early_stopping_callback(env: VecEnv, success_threshold: float = 0.95, consecutive_steps: int = 1_000):
+def get_early_stopping_callback(
+    env: VecEnv, success_threshold: float = 0.95, consecutive_steps: int = 1_000
+):
     return StopTrainingOnSuccessRate(env, success_threshold, consecutive_steps)
