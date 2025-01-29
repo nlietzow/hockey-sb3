@@ -84,8 +84,5 @@ if __name__ == "__main__":
     import torch
     import os
 
-    print(os.environ.get("CUDA_VISIBLE_DEVICES"))
-    print(f"CUDA Available: {torch.cuda.is_available()}")
-
     run_off_policy()
     run_on_policy()

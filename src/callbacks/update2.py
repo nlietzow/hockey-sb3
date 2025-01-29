@@ -13,7 +13,7 @@ class UpdatePlayer2(BaseCallback):
     def __init__(self, checkpoint_dir: Path, min_steps: int = 1_000):
         super().__init__()
         self.checkpoint_dir = checkpoint_dir
-        self._min_steps = min_steps * self.training_env.num_envs
+        self._min_steps = min_steps
 
     def _on_step(self) -> bool:
         params = self.model.get_parameters()
