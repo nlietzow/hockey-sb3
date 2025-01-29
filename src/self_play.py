@@ -74,7 +74,11 @@ def make_eval_env():
 
 
 def main():
-    run = wandb.init(project="cross_q-self-play", sync_tensorboard=True)
+    run = wandb.init(
+        project="cross_q-self-play",
+        sync_tensorboard=True,
+        settings=wandb.Settings(silent=True),
+    )
     checkpoint_dir = BASELINE_PATH.parent / run.id
     checkpoint_dir.mkdir(exist_ok=True)
 
@@ -97,7 +101,7 @@ def main():
         model = CrossQ.load(
             BASELINE_PATH,
             env,
-            verbose=1,
+            verbose=False,
             tensorboard_log=f"logs/{run.id}",
         )
         model.learn(

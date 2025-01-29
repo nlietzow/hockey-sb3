@@ -10,18 +10,21 @@ class UpdatePlayer2(BaseCallback):
     Save the model as a checkpoint and call the update_player2 method of the environment
     """
 
-    def __init__(self, checkpoint_dir: Path):
+    def __init__(self, checkpoint_dir: Path, min_steps: int = 1_000):
         super().__init__()
         self.checkpoint_dir = checkpoint_dir
+        self._min_steps = min_steps * self.training_env.num_envs
 
     def _on_step(self) -> bool:
         params = self.model.get_parameters()
-        with open(
-            self.checkpoint_dir / f"{str(self.num_timesteps).zfill(9)}.pkl", "wb"
-        ) as f:
+        fp = self.checkpoint_dir / f"{str(self.num_timesteps).zfill(9)}.pkl"
+        with open(fp, "wb") as f:
             pickle.dump(params, f)
 
-        self.training_env.env_method("update_player2")
+        if self.n_calls > self._min_steps:
+            self.logger.info("Triggering update_player2 method.")
+            self.training_env.env_method("update_player2", logger=self.logger)
+
         return True
 
 
