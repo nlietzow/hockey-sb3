@@ -1,13 +1,10 @@
 from typing import Type, Union
 
-import gymnasium as gym
 import wandb
 from hockey import REGISTERED_ENVS
-from sb3_contrib import CrossQ, TQC, TRPO
-from stable_baselines3 import A2C, DDPG, PPO, SAC, TD3
+from sbx import CrossQ, DDPG, PPO, SAC, TD3, TQC
 from stable_baselines3.common.callbacks import CallbackList
-from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.vec_env import DummyVecEnv
+from stable_baselines3.common.env_util import make_vec_env
 
 from callbacks import get_eval_callback, get_wandb_callback
 
@@ -15,6 +12,7 @@ assert REGISTERED_ENVS, "Hockey environments are not registered."
 
 POLICY_TYPE = "MlpPolicy"
 TOTAL_TIME_STEPS = 1_000_000
+NUM_ENVS = 4
 
 Algorithm = Union[
     Type[DDPG],
@@ -23,33 +21,18 @@ Algorithm = Union[
     Type[CrossQ],
     Type[TQC],
     Type[PPO],
-    Type[A2C],
-    Type[TRPO],
 ]
 
 
-def make_env():
-    def init():
-        env = gym.make("Hockey-One-v0")
-        env = Monitor(env)
-        return env
-
-    return DummyVecEnv([init])
-
-
 def run_for_algo(algorithm: Algorithm):
-    config = {
-        "algorithm": algorithm.__name__,
-        "policy_type": POLICY_TYPE,
-        "total_timesteps": TOTAL_TIME_STEPS,
-    }
     run = wandb.init(
         project="hockey-benchmark",
-        config=config,
         sync_tensorboard=True,
     )
 
-    env, eval_env = make_env(), make_env()
+    env = make_vec_env("Hockey-One-v0", n_envs=NUM_ENVS)
+    eval_env = make_vec_env("Hockey-One-v0", n_envs=NUM_ENVS)
+
     callback = CallbackList(
         [
             get_wandb_callback(run.id),
@@ -59,10 +42,10 @@ def run_for_algo(algorithm: Algorithm):
     success = False
     try:
         model = algorithm(
-            config["policy_type"], env, verbose=1, tensorboard_log=f"logs/{run.id}"
+            POLICY_TYPE, env, verbose=1, tensorboard_log=f"logs/{run.id}"
         )
         model.learn(
-            total_timesteps=config["total_timesteps"],
+            total_timesteps=TOTAL_TIME_STEPS,
             callback=callback,
         )
         success = True
@@ -74,7 +57,7 @@ def run_for_algo(algorithm: Algorithm):
 
 def run_off_policy():
     # run for off-policy algorithms
-    for algo in (DDPG, SAC, TD3, CrossQ, TQC):
+    for algo in (CrossQ, SAC, TQC, TD3, DDPG):
         try:
             run_for_algo(algo)
         except Exception as e:
@@ -82,13 +65,13 @@ def run_off_policy():
 
 
 def run_on_policy():
-    # run for on-policy algorithms
-    for algo in (PPO, A2C, TRPO):
-        try:
-            run_for_algo(algo)
-        except Exception as e:
-            print(f"Error during {algo} training:", e)
+    algo = PPO
+    try:
+        run_for_algo(algo)
+    except Exception as e:
+        print(f"Error during {algo} training:", e)
 
 
 if __name__ == "__main__":
+    run_off_policy()
     run_on_policy()
