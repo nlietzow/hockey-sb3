@@ -15,10 +15,11 @@ class UpdatePlayer2(BaseCallback):
         self.checkpoint_dir = checkpoint_dir
 
     def _on_step(self) -> bool:
+        params = self.model.get_parameters()
         with open(
             self.checkpoint_dir / f"{str(self.num_timesteps).zfill(9)}.pkl", "wb"
         ) as f:
-            pickle.dump(self.model.get_parameters(), f)
+            pickle.dump(params, f)
 
         self.training_env.env_method("update_player2")
         return True
