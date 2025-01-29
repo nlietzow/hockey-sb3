@@ -11,7 +11,7 @@ from callbacks import get_eval_callback, get_wandb_callback
 assert REGISTERED_ENVS, "Hockey environments are not registered."
 
 POLICY_TYPE = "MlpPolicy"
-TOTAL_TIME_STEPS = 1_000_000
+TOTAL_TIME_STEPS = 2_000_000
 NUM_ENVS = 4
 
 Algorithm = Union[
