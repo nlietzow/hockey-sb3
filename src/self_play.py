@@ -11,7 +11,7 @@ from stable_baselines3.common.callbacks import (
 )
 from stable_baselines3.common.vec_env import DummyVecEnv, VecMonitor
 
-from callbacks import get_eval_callback, get_update2_callback, get_wandb_callback
+from callbacks import get_eval_callback, get_wandb_callback
 from utils import CHECKPOINTS_DIR
 
 assert REGISTERED_ENVS, "Hockey environments are not registered."
