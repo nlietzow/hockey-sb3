@@ -9,6 +9,8 @@ from stable_baselines3.common.callbacks import (
 )
 from stable_baselines3.common.vec_env import VecEnv
 
+from callbacks.update2 import UpdatePlayer2
+
 
 class SaveBestModelParameters(BaseCallback):
     def __init__(self, checkpoint_dir: Path):
@@ -32,24 +34,29 @@ def get_eval_callback(
     eval_freq: int = 1_000,
     n_eval_episodes: int = 10,
     stop_training_on_reward: float | None = None,
+    update_player2_after_eval: bool = False,
+    verbose: int = 1,
     deterministic: bool = True,
     render: bool = False,
 ):
     if checkpoint_dir:
         checkpoint_dir = checkpoint_dir.resolve()
 
-    callbacks = []
+    callback_on_new_best = []
     if checkpoint_dir is not None:
-        callbacks.append(SaveBestModelParameters(checkpoint_dir))
+        callback_on_new_best.append(SaveBestModelParameters(checkpoint_dir))
 
     if stop_training_on_reward is not None:
-        callbacks.append(
+        callback_on_new_best.append(
             StopTrainingOnRewardThreshold(
                 reward_threshold=stop_training_on_reward, verbose=1
             )
         )
 
-    callback_on_new_best = CallbackList(callbacks) if callbacks else None
+    if update_player2_after_eval:
+        callback_after_eval = UpdatePlayer2(checkpoint_dir=checkpoint_dir, verbose=verbose)
+    else:
+        callback_after_eval = None
 
     return EvalCallback(
         eval_env,
@@ -58,5 +65,7 @@ def get_eval_callback(
         n_eval_episodes=n_eval_episodes,
         deterministic=deterministic,
         render=render,
-        callback_on_new_best=callback_on_new_best,
+        callback_on_new_best=CallbackList(callback_on_new_best) if callback_on_new_best else None,
+        verbose=verbose,
+        callback_after_eval=callback_after_eval
     )

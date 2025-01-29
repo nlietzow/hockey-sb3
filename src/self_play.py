@@ -92,8 +92,8 @@ def main():
                 env,
                 eval_env,
                 checkpoint_dir=checkpoint_dir,
+                update_player2_after_eval=True,
             ),
-            get_update2_callback(env, checkpoint_dir),
         ]
     )
     success = False

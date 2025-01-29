@@ -1,8 +1,7 @@
 import pickle
 from pathlib import Path
 
-from stable_baselines3.common.callbacks import BaseCallback, EveryNTimesteps
-from stable_baselines3.common.vec_env import VecEnv
+from stable_baselines3.common.callbacks import BaseCallback
 
 
 class UpdatePlayer2(BaseCallback):
@@ -26,15 +25,3 @@ class UpdatePlayer2(BaseCallback):
         self.training_env.env_method("update_player2", verbose=self.verbose)
 
         return True
-
-
-def get_update2_callback(
-    env: VecEnv,
-    checkpoint_dir: Path,
-    n_steps: int = 10_000,
-    verbose: int = 1,
-):
-    return EveryNTimesteps(
-        n_steps=n_steps * env.num_envs,
-        callback=UpdatePlayer2(checkpoint_dir=checkpoint_dir, verbose=verbose),
-    )
