@@ -4,7 +4,7 @@ from typing import Type
 import gymnasium as gym
 import wandb
 from hockey import OpponentType, REGISTERED_ENVS
-from sb3_contrib import CrossQ
+from sbx import CrossQ
 from stable_baselines3.common.base_class import BaseAlgorithm
 from stable_baselines3.common.callbacks import (
     CallbackList,
@@ -46,7 +46,7 @@ def make_train_env(checkpoint_dir: Path):
             checkpoint_path=CROSS_Q_DIR / "baseline.zip",
             checkpoint_dir=checkpoint_dir,
         )
-        for ot in OpponentType
+        for ot in list(OpponentType) * 2
     ]
 
     vec_env = DummyVecEnv(envs)
@@ -62,7 +62,7 @@ def make_eval_env():
             CrossQ,
             checkpoint_path=CROSS_Q_DIR / "baseline.zip",
         )
-        for _ in range(len(OpponentType))
+        for _ in range(len(OpponentType) * 2)
     ]
 
     vec_env = DummyVecEnv(envs)
