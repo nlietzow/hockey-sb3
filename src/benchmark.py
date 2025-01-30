@@ -14,12 +14,15 @@ TOTAL_TIME_STEPS = 2_000_000
 STOP_TRAINING_ON_REWARD = 9.5
 
 
-def run_for_algo(algorithm: Algorithm, n_envs: int = 4):
+def run_for_algo(algorithm: Algorithm, n_envs: int = 4, verbose: bool = True):
     run = wandb.init(
-        project="cross_q-self-play",
+        project="hockey-benchmark",
         sync_tensorboard=True,
         settings=wandb.Settings(silent=True),
     )
+
+    if verbose:
+        print(f"Training {algorithm} with {n_envs} environments.")
 
     env = make_vec_env("Hockey-One-v0", n_envs=n_envs)
     eval_env = make_vec_env("Hockey-One-v0", n_envs=n_envs)
@@ -53,10 +56,10 @@ def run_for_algo(algorithm: Algorithm, n_envs: int = 4):
         run.finish(exit_code=int(not success))
 
 
-def main():
-    for algo in (CrossQ, SAC, TQC, TD3, DDPG):
+def main(verbose: bool = True):
+    for algo in (CrossQ, TQC, SAC, TD3, DDPG):
         try:
-            run_for_algo(algo)
+            run_for_algo(algo, verbose=verbose)
         except Exception as e:
             print(f"Error during {algo} training:", e)
 

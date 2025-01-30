@@ -29,6 +29,9 @@ def get_eval_callback(
 
     callback_after_eval = None
     if update_player2_after_eval:
+        if checkpoint_dir is None:
+            raise ValueError("checkpoint_dir is required for update_player2_after_eval")
+
         callback_after_eval = UpdatePlayer2(
             checkpoint_dir=checkpoint_dir,
             verbose=verbose,
