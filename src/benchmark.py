@@ -10,7 +10,7 @@ assert REGISTERED_ENVS, "Hockey environments are not registered."
 
 POLICY_TYPE = "MlpPolicy"
 TOTAL_TIME_STEPS = 2_000_000
-STOP_TRAINING_ON_REWARD = 9.5
+STOP_TRAINING_ON_REWARD = 9.25
 
 
 def run_for_algo(algorithm: Algorithm, n_envs: int = 4, verbose: bool = True):
@@ -26,9 +26,7 @@ def run_for_algo(algorithm: Algorithm, n_envs: int = 4, verbose: bool = True):
     env = make_vec_env("Hockey-One-v0", n_envs=n_envs)
     eval_env = make_vec_env("Hockey-One-v0", n_envs=n_envs)
 
-    callback = callbacks.init(
-        stop_on_reward_threshold=STOP_TRAINING_ON_REWARD
-    )
+    callback = callbacks.init(stop_on_reward_threshold=STOP_TRAINING_ON_REWARD)
     success = False
     try:
         model = algorithm(

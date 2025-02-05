@@ -34,7 +34,6 @@ class _CustomEvalCallback(BaseCallback):
 
         self.env = HockeyEnv()
         self.opponent = BasicOpponent(weak=False)
-        self.best_mean_reward = -np.inf
 
     def _run_eval(self):
         rewards = np.full((self.n_episodes, self.env.max_timesteps), np.nan)
@@ -67,25 +66,10 @@ class _CustomEvalCallback(BaseCallback):
         return mean_reward, mean_episode_length, success_rate
 
     def _on_step(self) -> bool:
-        mean_reward, _, _ = self._run_eval()
-
-        if mean_reward > self.best_mean_reward:
-            self.best_mean_reward = mean_reward
-            if self.verbose > 0:
-                print("New best mean reward: {:.2f}".format(mean_reward))
-
-        return self._continue_training
-
-    @property
-    def _continue_training(self) -> bool:
-        stop_training = (
-            self.stop_on_reward_threshold is not None
-            and self.best_mean_reward > self.stop_on_reward_threshold
-        )
-        if self.verbose > 0 and stop_training:
-            print("Stopping training because mean reward is greater than threshold.")
-
-        return not stop_training
+        mean_reward, mean_episode_length, success_rate = self._run_eval()
+        if self.stop_on_reward_threshold is not None:
+            return success_rate < 1.0 or mean_reward < self.stop_on_reward_threshold
+        return True
 
 
 def init(

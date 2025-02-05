@@ -4,7 +4,7 @@ from sbx import CrossQ
 
 from utils import CHECKPOINTS_DIR
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     env = HockeyEnv()
     crossq = CrossQ.load(CHECKPOINTS_DIR / "cross_q" / "model")
     opponent = BasicOpponent(weak=False)
