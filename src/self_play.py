@@ -18,11 +18,11 @@ BASELINE_PATH = CHECKPOINTS_DIR / "cross_q" / "model.zip"
 
 
 def _make_env(
-        opponent_type: OpponentType = OpponentType.rule_based,
-        algorithm_cls: Algorithm = None,
-        checkpoint_path: Path = None,
-        checkpoint_dir: Path = None,
-        print_init_type: bool = False,
+    opponent_type: OpponentType = OpponentType.rule_based,
+    algorithm_cls: Algorithm = None,
+    checkpoint_path: Path = None,
+    checkpoint_dir: Path = None,
+    print_init_type: bool = False,
 ):
     def _init():
         env = gym.make(

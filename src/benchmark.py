@@ -1,10 +1,9 @@
 import wandb
 from hockey import REGISTERED_ENVS
 from sbx import CrossQ, DDPG, SAC, TD3, TQC
-from stable_baselines3.common.callbacks import CallbackList
 from stable_baselines3.common.env_util import make_vec_env
 
-from callbacks import get_eval_callback, get_wandb_callback
+from callbacks import callbacks
 from utils import Algorithm
 
 assert REGISTERED_ENVS, "Hockey environments are not registered."
@@ -27,15 +26,8 @@ def run_for_algo(algorithm: Algorithm, n_envs: int = 4, verbose: bool = True):
     env = make_vec_env("Hockey-One-v0", n_envs=n_envs)
     eval_env = make_vec_env("Hockey-One-v0", n_envs=n_envs)
 
-    callback = CallbackList(
-        [
-            get_wandb_callback(run.id),
-            get_eval_callback(
-                run.id,
-                eval_env,
-                stop_training_on_reward=STOP_TRAINING_ON_REWARD,
-            ),
-        ]
+    callback = callbacks.init(
+        stop_on_reward_threshold=STOP_TRAINING_ON_REWARD
     )
     success = False
     try:
