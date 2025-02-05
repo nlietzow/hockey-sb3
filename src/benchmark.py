@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import wandb
 from hockey import REGISTERED_ENVS
 from sbx import CrossQ, DDPG, SAC, TD3, TQC
@@ -24,9 +26,10 @@ def run_for_algo(algorithm: Algorithm, n_envs: int = 4, verbose: bool = True):
         print(f"Training {algorithm} with {n_envs} environments.")
 
     env = make_vec_env("Hockey-One-v0", n_envs=n_envs)
-    eval_env = make_vec_env("Hockey-One-v0", n_envs=n_envs)
-
-    callback = callbacks.init(stop_on_reward_threshold=STOP_TRAINING_ON_REWARD)
+    callback = callbacks.init(
+        run_id=run.id,
+        stop_on_reward_threshold=STOP_TRAINING_ON_REWARD
+    )
     success = False
     try:
         model = algorithm(
@@ -42,7 +45,6 @@ def run_for_algo(algorithm: Algorithm, n_envs: int = 4, verbose: bool = True):
         success = True
     finally:
         env.close()
-        eval_env.close()
         run.finish(exit_code=int(not success))
 
 

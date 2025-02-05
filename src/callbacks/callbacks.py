@@ -73,6 +73,7 @@ class _CustomEvalCallback(BaseCallback):
 
 
 def init(
+    run_id: str,
     n_steps: int = 10_000,
     n_episodes_eval: int = 100,
     update_player_two: bool = False,
@@ -96,6 +97,6 @@ def init(
     return CallbackList(
         [
             every_n_steps,
-            WandbCallback(),
+            WandbCallback(model_save_path=f"models/{run_id}"),
         ]
     )
