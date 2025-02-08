@@ -17,7 +17,7 @@ class _UpdatePlayerTwoCallback(BaseCallback):
 
     def _on_step(self) -> bool:
         if self.update_player_two:
-            self.training_env.env_method("update_player_two")
+            self.training_env.env_method("update_opponent", self.model.get_parameters())
         return True
 
 
