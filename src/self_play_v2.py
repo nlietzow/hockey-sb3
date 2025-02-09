@@ -3,7 +3,7 @@ from hockey import REGISTERED_ENVS
 from sbx import CrossQ
 from stable_baselines3.common.callbacks import CallbackList, EvalCallback
 from stable_baselines3.common.env_util import make_vec_env
-from transformers.integrations import WandbCallback
+from wandb.integration.sb3 import WandbCallback
 
 from utils import CHECKPOINTS_DIR
 
@@ -14,9 +14,9 @@ TOTAL_TIME_STEPS = 100_000
 
 
 def main(
-        n_envs: int = 4,
-        model_class: type[CrossQ] = CrossQ,
-        checkpoint_path=CHECKPOINTS_DIR / "cross_q" / "model.zip",
+    n_envs: int = 4,
+    model_class: type[CrossQ] = CrossQ,
+    checkpoint_path=CHECKPOINTS_DIR / "cross_q" / "model.zip",
 ):
     run = wandb.init(
         project="cross_q-self-play",
@@ -34,14 +34,16 @@ def main(
             ),
         )
         eval_env = make_vec_env("Hockey-One-v0-BasicOpponent", n_envs=n_envs)
-        callbacks = CallbackList([
-            EvalCallback(
-                eval_env=eval_env,
-                n_eval_episodes=10,
-                eval_freq=10_000,
-            ),
-            WandbCallback(),
-        ])
+        callbacks = CallbackList(
+            [
+                EvalCallback(
+                    eval_env=eval_env,
+                    n_eval_episodes=10,
+                    eval_freq=10_000,
+                ),
+                WandbCallback(model_save_path=f"models/{run_id}"),
+            ]
+        )
 
         parameters = model_class.load(checkpoint_path).get_parameters()
         for _ in range(10):
@@ -66,5 +68,5 @@ def main(
         run.finish(exit_code=int(not success))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
