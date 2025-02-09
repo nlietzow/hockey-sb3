@@ -41,7 +41,7 @@ def main(
                     n_eval_episodes=10,
                     eval_freq=10_000,
                 ),
-                WandbCallback(model_save_path=f"models/{run_id}"),
+                WandbCallback(model_save_path=f"models/{run.id}"),
             ]
         )
 
